@@ -1,0 +1,191 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace ConsoleSearchExample
+{
+    class Program
+    {
+        static Dictionary<string, string> userCredentials = new Dictionary<string, string>();
+        static string currentUser = null;
+        static List<int> feedbackRatings = new List<int>();
+        static List<string> featureSuggestions = new List<string>();
+
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Welcome to GOV.UK Online Services");
+            Console.WriteLine("Please log in or register to use this service.\n");
+
+            while (currentUser == null)
+            {
+                Console.WriteLine("1. Log in to your GOV.UK account");
+                Console.WriteLine("2. Register for a new GOV.UK account");
+                Console.Write("Select an option (1 or 2): ");
+                string option = Console.ReadLine();
+
+                if (option == "1")
+                {
+                    Login();
+                }
+                else if (option == "2")
+                {
+                    Register();
+                }
+                else
+                {
+                    Console.WriteLine("Invalid option. Please select 1 or 2.");
+                }
+
+                Console.WriteLine();
+            }
+
+            Console.WriteLine($"\nWelcome, {currentUser}!");
+            Console.WriteLine("You can now access GOV.UK search services.\n");
+
+            SearchFunctionality();
+            DisplayFeatureSuggestions();
+
+            Console.WriteLine("Thank you for using GOV.UK. Goodbye!");
+        }
+
+        static void Register()
+        {
+            Console.WriteLine("\n--- GOV.UK Registration ---");
+            Console.Write("Enter a username: ");
+            string username = Console.ReadLine();
+
+            if (userCredentials.ContainsKey(username))
+            {
+                Console.WriteLine("This username is already registered. Please choose another.");
+                return;
+            }
+
+            Console.Write("Enter a password: ");
+            string password = Console.ReadLine();
+
+            userCredentials[username] = password;
+            Console.WriteLine("Your account has been successfully created. You can now log in.");
+        }
+
+        static void Login()
+        {
+            Console.WriteLine("\n--- GOV.UK Login ---");
+            Console.Write("Enter your username: ");
+            string username = Console.ReadLine();
+
+            Console.Write("Enter your password: ");
+            string password = Console.ReadLine();
+
+            if (userCredentials.ContainsKey(username) && userCredentials[username] == password)
+            {
+                currentUser = username;
+                Console.WriteLine("Login successful. Welcome to GOV.UK!");
+            }
+            else
+            {
+                Console.WriteLine("The username or password you entered is incorrect. Please try again.");
+            }
+        }
+
+        static void SearchFunctionality()
+        {
+            List<string> itemList = new List<string>
+            {
+                "Benefits",
+                "Births, deaths, marriages and care",
+                "Business and self-employed",
+                "Childcare and parenting",
+                "Citizenship and living in the UK",
+                "Crime, justice and the law",
+                "Disabled people"
+            };
+
+            Console.WriteLine("Type a search term and press Enter to find GOV.UK services.");
+            Console.WriteLine("Type 'exit' to return to the main menu.");
+            Console.WriteLine();
+
+            while (true)
+            {
+                Console.Write("Enter search term: ");
+                string searchQuery = Console.ReadLine();
+
+                if (searchQuery.ToLower() == "exit")
+                {
+                    break;
+                }
+
+                var filteredItems = itemList.Where(item => item.ToLower().Contains(searchQuery.ToLower())).ToList();
+
+                if (filteredItems.Count == 0)
+                {
+                    Console.WriteLine("No matching GOV.UK services found. Please try a different search term.");
+                }
+                else
+                {
+                    Console.WriteLine("Here are the services that match your search:");
+                    foreach (var item in filteredItems)
+                    {
+                        Console.WriteLine($"- {item}");
+                    }
+
+                    CollectFeedback();
+                }
+
+                Console.WriteLine();
+            }
+        }
+
+        static void CollectFeedback()
+        {
+            while (true)
+            {
+                Console.Write("How helpful were these results? (Rate 1-5, or type 'skip' to skip): ");
+                string feedbackInput = Console.ReadLine();
+
+                if (feedbackInput.ToLower() == "skip")
+                {
+                    Console.WriteLine("Feedback skipped. Thank you for using GOV.UK.");
+                    break;
+                }
+
+                if (int.TryParse(feedbackInput, out int rating) && rating >= 1 && rating <= 5)
+                {
+                    feedbackRatings.Add(rating);
+
+                    Console.Write("Do you have any suggestions to improve this service? (Leave blank to skip): ");
+                    string suggestion = Console.ReadLine();
+
+                    if (!string.IsNullOrWhiteSpace(suggestion))
+                    {
+                        featureSuggestions.Add(suggestion);
+                        Console.WriteLine("Your suggestion has been noted. Thank you for your input.");
+                    }
+
+                    double averageRating = feedbackRatings.Average();
+                    Console.WriteLine($"Thank you for your feedback. The current average rating is {averageRating:F1}/5.");
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine("Invalid input. Please provide a rating between 1 and 5, or type 'skip' to continue.");
+                }
+            }
+        }
+
+        static void DisplayFeatureSuggestions()
+        {
+            if (featureSuggestions.Count > 0)
+            {
+                Console.WriteLine("\nThank you for your suggestions. Here's what you've shared:");
+                foreach (var suggestion in featureSuggestions)
+                {
+                    Console.WriteLine($"- {suggestion}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("\nNo feature suggestions were submitted. Thank you for using GOV.UK services.");
+            }
+        }
+    }
+}
